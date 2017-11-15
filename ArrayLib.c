@@ -83,7 +83,7 @@ int equals(Vector v1, Vector v2);
 int main(){
 
     // Test create, insert and print
-/*    printf("Test create, insert and print\n");
+    printf("Test create, insert and print\n");
     Vector v1 = create_vector(2);
     insert(&v1, 1.0);
     insert(&v1, 2.0);
@@ -93,7 +93,7 @@ int main(){
     print_vec(v1);
     printf("\n");
 
-    // Test copy and copy range
+/*    // Test copy and copy range
     printf("Test copy and copy range\n");
     Vector v2 = copy(v1);
     print_vec(v2);
@@ -187,8 +187,18 @@ int main(){
     vector, the count (initialized to zero) of doubles
     inserted, and the allocated vector.
 */
-//Vector create_vector(int length){
-//}
+Vector create_vector(int length){
+    Vector v;
+    v.vector = malloc(sizeof(double) * length);
+    // check for null 
+    if(v.vector == 0){
+        puts("Can't allocate memory for pointer. Exit program.");
+        exit(1);
+    }
+    v.length = length;
+    v.count = 0;
+    return v;
+}
 
 
 /*
@@ -197,8 +207,12 @@ int main(){
     when something fails during the creation of a Vector or
     other functions that return a Vector.
 */
-//Vector empty_vector(){
-//}
+Vector empty_vector(){
+    Vector v;
+    v.vector = 0;
+    v.length = 0;
+    v.count = 0;
+}
 
 
 /*
@@ -210,8 +224,19 @@ int main(){
     You can use malloc, which requires you to manually copy
     and free the old vector or try realloc.
 */
-//int insert(Vector *vec, double dbl){
-//}
+int insert(Vector *vec, double dbl){
+    // Case: vector is full
+    if(vec->count==vec->length){
+        double *newVec = malloc(2*length*sizeof(double));
+        if(newVec == 0){
+            puts("Cannot allocate more memory to vector.");
+            return;
+        }
+        length *= 2;
+    } // @post--vector has space after count
+    vec->vector[vec->count] = dbl;
+    vec->count+=1;
+}
 
 
 /*
