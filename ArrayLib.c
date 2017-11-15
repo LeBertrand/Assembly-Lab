@@ -227,12 +227,12 @@ Vector empty_vector(){
 int insert(Vector *vec, double dbl){
     // Case: vector is full
     if(vec->count==vec->length){
-        double *newVec = malloc(2*length*sizeof(double));
+        double *newVec = malloc(2*vec->length*sizeof(double));
         if(newVec == 0){
             puts("Cannot allocate more memory to vector.");
             return;
         }
-        length *= 2;
+        vec->length *= 2;
     } // @post--vector has space after count
     vec->vector[vec->count] = dbl;
     vec->count+=1;
@@ -243,8 +243,15 @@ int insert(Vector *vec, double dbl){
     Prints the count, length and elements of a vector to
     screen.
 */
-//void print_vec(Vector vec){
-//}
+void print_vec(Vector vec){
+    printf("Vector contains %d objects, with space allocated for %d.\n",
+        vec.length, vec.count);
+    int index;
+    for(index = 0; index < vec.count; index++){
+        printf("\t%lf", vec.vector[index]);
+    }
+    puts("");
+}
 
 
 /*
