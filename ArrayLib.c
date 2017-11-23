@@ -228,7 +228,7 @@ int insert(Vector *vec, double dbl){
     // Case: vector is full
     if(vec->count==vec->length){
         double *newVec = malloc(2*vec->length*sizeof(double));
-        if(newVec == 0){
+        if(newVec == NULL){
             puts("Cannot allocate more memory to vector.");
             return;
         }
