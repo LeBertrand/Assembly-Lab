@@ -1,4 +1,3 @@
-	.file	"polynomial.c"
 	.text
 	.globl	polynomial
 	.type	polynomial, @function
