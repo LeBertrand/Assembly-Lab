@@ -93,7 +93,7 @@ int main(){
     print_vec(v1);
     printf("\n");
 
-/*    // Test copy and copy range
+    // Test copy and copy range
     printf("Test copy and copy range\n");
     Vector v2 = copy(v1);
     print_vec(v2);
@@ -108,7 +108,7 @@ int main(){
     fill(&v2, 1.0);
     print_vec(v2);
     printf("\n");
-
+/*
     // Test read and write
     printf("Test read and write\n");
     Vector v4 = read_from_file("array_in.txt");
@@ -191,7 +191,7 @@ Vector create_vector(int length){
     Vector v;
     v.vector = malloc(sizeof(double) * length);
     // check for null 
-    if(v.vector == 0){
+    if(v.vector == NULL){
         puts("Can't allocate memory for pointer. Exit program.");
         exit(1);
     }
@@ -209,9 +209,10 @@ Vector create_vector(int length){
 */
 Vector empty_vector(){
     Vector v;
-    v.vector = 0;
-    v.length = 0;
+    v.vector = (double*) malloc(sizeof(double));
+    v.length = 1;
     v.count = 0;
+    return v;
 }
 
 
@@ -226,16 +227,22 @@ Vector empty_vector(){
 */
 int insert(Vector *vec, double dbl){
     // Case: vector is full
+    
     if(vec->count==vec->length){
+        
         double *newVec = malloc(2*vec->length*sizeof(double));
         if(newVec == NULL){
             puts("Cannot allocate more memory to vector.");
-            return;
+            return 1;
         }
+        
         vec->length *= 2;
+        
     } // @post--vector has space after count
+    //printf("Trying to put value no. %d, %lf into vector", vec->count,vec->vector[vec->count]);
     vec->vector[vec->count] = dbl;
     vec->count+=1;
+    return 1;
 }
 
 
@@ -245,7 +252,7 @@ int insert(Vector *vec, double dbl){
 */
 void print_vec(Vector vec){
     printf("Vector contains %d objects, with space allocated for %d.\n",
-        vec.length, vec.count);
+        vec.count, vec.length);
     int index;
     for(index = 0; index < vec.count; index++){
         printf("\t%lf", vec.vector[index]);
@@ -259,16 +266,31 @@ void print_vec(Vector vec){
     the count and length to zero.  Make sure not the free
     an empty (NULL) vector.
 */
-//void delete_vector(Vector *vec){
-//}
+void delete_vector(Vector *vec){
+    if(vec->vector != NULL){
+        free(vec->vector);
+    }
+    vec->count = vec->length = 0;
+}
 
 
 /*
     Creates a new vector with equal count, length and
     elements and returns the vector.
 */
-//Vector copy(Vector vec){
-//}
+Vector copy(Vector vec){
+    Vector u = empty_vector();
+    
+    
+    // case: empty vector or corrupted data
+    if(vec.count && vec.vector != NULL){
+        int index;
+        for(index = 0; index < vec.length; index++){
+            insert(&u, vec.vector[index]);
+        }
+    }
+    return u;
+}
 
 
 /*
@@ -279,31 +301,56 @@ void print_vec(Vector vec){
         to less than from
         to less than zero
         from greater than or equal to count
+    Indexes start at 0 and are inclusive
 */
-//Vector copy_range(Vector vec, int from, int to){
-//}
+Vector copy_range(Vector vec, int from, int to){
+    Vector u = empty_vector();
+    // catch some errors
+    if(to<from || from < 0 || from >= vec.count){
+        printf("Bad copy-range call. From: %d, To: %d\n", from, to);
+        return u;
+    }
+    // iterate starting at 'from' index ending at 'to', and insert
+    for(;from <= to; from++){
+        insert(&u,vec.vector[from]);
+    }
+    return u;
+}
 
 
 /*
     Writes zeros to the elements of a vector and sets
     the count to zero.
 */
-//void clear_vector(Vector *vec){
-//}
+void clear_vector(Vector *vec){
+    int zeroed;
+    for(zeroed = 0; zeroed < vec->count; zeroed++){
+        vec->vector[zeroed] = 0.0;
+    }
+    vec->count = 0;
+}
 
 
 /*
     Writes zeros to a vector's elements.
 */
-//void zeros(Vector *vec){
-//}
+void zeros(Vector *vec){
+    int zeroed;
+    for(zeroed = 0; zeroed < vec->count; zeroed++){
+        vec->vector[zeroed] = 0.0;
+    }
+}
 
 
 /*
     Fills a vector's elements with the value in dbl.
 */
-//void fill(Vector *vec, double dbl){
-//}
+void fill(Vector *vec, double dbl){
+    int filled;
+    for(filled = 0; filled < vec->count; filled++){
+        vec->vector[filled] = dbl;
+    }
+}
 
 
 /*
@@ -312,8 +359,30 @@ void print_vec(Vector vec){
     Remember that scanf returns a -1 after reading
     the last element in a file.
 */
-//Vector read_from_file(char *filename){
-//}
+Vector read_from_file(char *filename){
+    // Create Vector
+    Vector v = empty_vector();
+    
+    // Open file.
+    FILE* file_in = fopen(filename, "r");
+    
+    // Create string to hold each line of the file.
+    char dblstr[10];
+    
+    // Create double to hold each converted double.
+    double dbin;
+    
+    // Empty string before reading in file.
+    strcpy(dblstr,"\n\n\n\n\n\n\n\n\n\n
+    
+    // Read in each line.
+    while(fgets(dblstr, 10, file_in) != 0){
+        dbin = atof(dblstr);
+        insert(v, dbin);
+    }
+    
+    return v;
+}
 
 
 /*
