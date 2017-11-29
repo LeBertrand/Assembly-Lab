@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
+#include <string.h>
 
 #define INIT_SIZE 4
 #define EPSILON 0.01
@@ -108,21 +109,21 @@ int main(){
     fill(&v2, 1.0);
     print_vec(v2);
     printf("\n");
-/*
+
     // Test read and write
     printf("Test read and write\n");
     Vector v4 = read_from_file("array_in.txt");
     print_vec(v4);
     write_to_file(v1, "array_out.txt");
     printf("\n");
-
+/*
     // Test get from con and add from con
     Vector v5 = get_from_con();
     print_vec(v5);
     add_from_con(&v5);
     print_vec(v5);
     printf("\n");
-
+*/
     // Test swap, sort, reverse and search
     printf("Test swap, sort, reverse and search\n");
     swap(&v1, 0, 4);
@@ -131,7 +132,9 @@ int main(){
     sort(&v1);
     print_vec(v1);
     reverse(&v4);
+    // Was the vector supposed to be sorted here?
     print_vec(v4);
+    sort(&v4);
     int i = search(v4, 6.0);
     printf("Found at %d\n\n", i);
 
@@ -141,7 +144,7 @@ int main(){
     printf("Avg = %f\n", avg(v4));
     printf("Var = %f\n", var(v4));
     printf("Stdv = %f\n\n", stdv(v4));
-
+/*
     // Test add, sub, mul, divv, dot and equals
     printf("Test add, sub, mul, divv, dot and equals\n");
     Vector v6 = add(v1, v4);
@@ -373,14 +376,14 @@ Vector read_from_file(char *filename){
     double dbin;
     
     // Empty string before reading in file.
-    strcpy(dblstr,"\n\n\n\n\n\n\n\n\n\n
+    strcpy(dblstr,"\n\n\n\n\n\n\n\n\n\n");
     
     // Read in each line.
     while(fgets(dblstr, 10, file_in) != 0){
         dbin = atof(dblstr);
-        insert(v, dbin);
+        insert(&v, dbin);
     }
-    
+    //fclose(file_in);
     return v;
 }
 
@@ -388,8 +391,15 @@ Vector read_from_file(char *filename){
 /*
     Writes a vector's elements to a file.
 */
-//int write_to_file(Vector vec, char *filename){
-//}
+int write_to_file(Vector vec, char *filename){
+    FILE* file_out = fopen(filename, "w");
+    int x;
+    for(x = 0; x < vec.count; x++){
+        fprintf(file_out, "%.2f", vec.vector[x]);
+        fputc('\n', file_out);
+    }
+    fclose(file_out);
+}
 
 
 /*
@@ -400,8 +410,21 @@ Vector read_from_file(char *filename){
     required data type is entered.  You should use gets
     and check for '\0', when Enter only is pressed.
 */
-//Vector get_from_con(){
-//}
+Vector get_from_con(){
+    Vector v = empty_vector();
+    char input[30];
+    double dbl;
+    int going = gets(input);
+    
+    while(going){
+        dbl = atof(input);
+        insert(&v, dbl);
+        gets(input);
+        going = input[0] != NULL;
+    }
+    
+    return v;
+}
 
 
 /*
@@ -412,30 +435,58 @@ Vector read_from_file(char *filename){
     required data type is entered.  You should use gets
     and check for '\0', when Enter only is pressed.
 */
-//void add_from_con(Vector *vec){
-//}
+void add_from_con(Vector *vec){
+    char input[30];
+    double dbl;
+    int going = gets(input);
+    
+    while(going){
+        dbl = atof(input);
+        insert(vec, dbl);
+        gets(input);
+        going = input[0] != NULL;
+    }
+}
 
 
 /*
     Swaps two elements in a vector.
 */
-//void swap(Vector *vec, int i, int j){
-//}
+void swap(Vector *vec, int i, int j){
+    int x = vec->vector[i];
+    vec->vector[i] = vec->vector[j];
+    vec->vector[j] = x;
+}
 
 
 /*
     Sorts a vector.  Can use selection or bubble
-    sort.
+    sort. Ascending order.
 */
-//void sort(Vector *vec){
-//}
+void sort(Vector *vec){
+    int n, going = 1;
+    while(going){
+        going = 0;
+        for(n = 1; n < vec->count; n++){
+            if(vec->vector[n] < vec->vector[n - 1]){
+                swap(vec, n, n - 1);
+                going = 1;
+            }
+        }
+    }
+}
+
 
 
 /*
     Reverses the elements of a vector.
 */
-//void reverse(Vector *vec){
-//}
+void reverse(Vector *vec){
+    int i;
+    for(i = 0; i < (vec->count) / 2; i++){
+        swap(vec, i, vec->count - i - 1);
+    }
+}
 
 
 /*
@@ -444,48 +495,87 @@ Vector read_from_file(char *filename){
     for which two do floating point values are considered
     equal due to computation of arithmetic operations.
 */
-//int dbl_equals(double d1, double d2){
-//}
+int dbl_equals(double d1, double d2){
+    double dif = fabs(d1-d2);
+    return dif < EPSILON;
+}
 
 
 /*
     Perform a binary search on a sorted vector and return
     the index of the element if found and -1 if not found.
 */
-//int search(Vector vec, double dbl){
-//}
+int search(Vector vec, double dbl){
+    int lower = 0;
+    int upper = vec.count - 1;
+    int mid = (upper + lower)/2;
+    while(lower < upper){
+        // searching too early.
+        if(vec.vector[mid] < dbl){
+            // retain second half of list
+            lower = mid + 1;
+        }
+        // searching too late...retain first half of list
+        else upper = mid;
+        
+        // find new middle of list
+        mid = (upper + lower)/2;
+    }
+    if(vec.vector[mid] == dbl)
+        return mid;
+    else return -1;
+}
 
 
 /*
     Calculate and return the sum of the elements in
     a vector.
 */
-//double sum(Vector vec){
-//}
+double sum(Vector vec){
+    int index;
+    double running = 0;
+    for(index = 0; index < vec.count; index++){
+        running += vec.vector[index];
+    }
+    return running;
+}
 
 
 /*
     Calculate and return the average of the elements in
     a vector.
 */
-//double avg(Vector vec){
-//}
+double avg(Vector vec){
+    double mean = sum(vec); // this is about footprint, not run-time
+    mean /= vec.count;
+    return mean;
+}
 
 
 /*
     Calculate and return the variance of the elements in
     a vector.
 */
-//double var(Vector vec){
-//}
+double var(Vector vec){
+    double mean = avg(vec);
+    double running = 0;
+    int index;
+    for(index = 0; index < vec.count; index++){
+        double dif = mean - vec.vector[index];
+        running += (dif * dif)/(vec.count-1);
+    }
+    
+    return running;
+}
 
 
 /*
     Calculate and return the standard deviation of the
     elements in a vector.
 */
-//double stdv(Vector vec){
-//}
+double stdv(Vector vec){
+    return sqrt(var(vec));
+}
 
 
 
@@ -499,9 +589,39 @@ Vector read_from_file(char *filename){
     Perform an element by element addition of two vectors,
     where v3[i] = v1[i] + v2[i] and return the resulting
     vector.
+    Does not require vectors from the same space, but produces list of
+    greatest length input.
 */
-//Vector add(Vector v1, Vector v2){
-//}
+Vector add(Vector v1, Vector v2){
+    
+    Vector sums = empty_vector();
+    
+    int two_longer = 0, len = v1.count;
+    // 
+    if(v2.count < len){
+        len = v2.count;
+        two_longer = 1;
+    }
+    
+    int index;
+    for(index = 0; index < len; index++){
+        insert(&sums, v1.vector[index] + v2.vector[index]);
+    } //post: two is shorter than 1, or two_longer. Iterate over remaining positions
+    
+    if(two_longer){
+        while(index < v2.count){
+            insert(&sums, v2.vector[index]);
+            index++;
+        }
+    }
+    else{
+        while(index < v1.count){
+            insert(&sums, v1.vector[index]);
+            index++;
+        }
+    }
+    return sums;
+}
 
 
 /*
@@ -509,8 +629,16 @@ Vector read_from_file(char *filename){
     another, where v3[i] = v1[i] - v2[i] and return the resulting
     vector.
 */
-//Vector sub(Vector v1, Vector v2){
-//}
+Vector sub(Vector v1, Vector v2){
+    Vector in_place = copy(v2);
+    // footprint, not efficiency
+    int index;
+    for(index = 0; index < in_place.count; index++){
+        in_place.vector[index] *= (-1);
+    }
+    return add(sum, v1);
+    
+}
 
 
 /*
@@ -518,8 +646,14 @@ Vector read_from_file(char *filename){
     where v3[i] = v1[i] * v2[i] and return the resulting
     vector.
 */
-//Vector mul(Vector v1, Vector v2){
-//}
+Vector mul(Vector v1, Vector v2){
+    if(v1.count != v2.count){
+        puts("Cannot multiply vectors of differing length.");
+        return empty_vector();
+    }
+    
+    
+}
 
 
 /*
