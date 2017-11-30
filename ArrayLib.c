@@ -144,7 +144,7 @@ int main(){
     printf("Avg = %f\n", avg(v4));
     printf("Var = %f\n", var(v4));
     printf("Stdv = %f\n\n", stdv(v4));
-/*
+
     // Test add, sub, mul, divv, dot and equals
     printf("Test add, sub, mul, divv, dot and equals\n");
     Vector v6 = add(v1, v4);
@@ -167,12 +167,12 @@ int main(){
     delete_vector(&v2);
     delete_vector(&v3);
     delete_vector(&v4);
-    delete_vector(&v5);
+    //delete_vector(&v5);
     delete_vector(&v6);
     delete_vector(&v7);
     delete_vector(&v8);
     delete_vector(&v9);
-*/
+
 
     return 0;
 }
@@ -240,6 +240,7 @@ int insert(Vector *vec, double dbl){
         }
         
         vec->length *= 2;
+        vec->vector = newVec;
         
     } // @post--vector has space after count
     //printf("Trying to put value no. %d, %lf into vector", vec->count,vec->vector[vec->count]);
@@ -636,7 +637,7 @@ Vector sub(Vector v1, Vector v2){
     for(index = 0; index < in_place.count; index++){
         in_place.vector[index] *= (-1);
     }
-    return add(sum, v1);
+    return add(in_place, v1);
     
 }
 
@@ -651,18 +652,34 @@ Vector mul(Vector v1, Vector v2){
         puts("Cannot multiply vectors of differing length.");
         return empty_vector();
     }
+    Vector prod = empty_vector();
+    int index;
+    for(index = 0; index < v1.count; index++){
+        insert(&prod, v1.vector[index] * v2.vector[index]);
+    }
     
-    
+    return prod;
 }
 
 
 /*
     Perform an element by element division of two vectors,
     where v3[i] = v1[i] / v2[i] and return the resulting
-    vector.
+    vector. No effort made to catch DIV0.
 */
-//Vector divv(Vector v1, Vector v2){
-//}
+Vector divv(Vector v1, Vector v2){
+    if(v1.count != v2.count){
+        puts("Cannot multiply vectors of differing length.");
+        return empty_vector();
+    }
+    Vector quotient = empty_vector();
+    int index;
+    for(index = 0; index < v1.count; index++){
+        insert(&quotient, v1.vector[index] / v2.vector[index]);
+    }
+    
+    return quotient;
+}
 
 
 /*
@@ -670,8 +687,9 @@ Vector mul(Vector v1, Vector v2){
     where dbl += v1[i] * v2[i] and return the resulting
     double.
 */
-//double dot(Vector v1, Vector v2){
-//}
+double dot(Vector v1, Vector v2){
+    return sum(mul(v1, v2));
+}
 
 
 /*
@@ -679,8 +697,19 @@ Vector mul(Vector v1, Vector v2){
     If for every i, v1[i] == v2[i], and the count is equal
     return 1, otherwise zero.
 */
-//int equals(Vector v1, Vector v2){
-//}
+int equals(Vector v1, Vector v2){
+    if(v1.count != v2.count){
+        return 0;
+    }
+    
+    int index;
+    for(index = v1.count - 1; index >= 0; index--){
+        if(v1.vector[index] != v2.vector[index]){
+            return 0;
+        }
+    }
+    return 1;
+}
 
 
 
